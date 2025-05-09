@@ -1,7 +1,6 @@
 const express = require('express');
 const nodemailer = require('nodemailer');
 const bodyParser = require('body-parser');
-const path = require('path');
 const cors = require('cors');
 require('dotenv').config();
 
@@ -13,7 +12,6 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-
 // Email transporter setup
 const transporter = nodemailer.createTransporter({
   service: 'gmail',
@@ -23,9 +21,23 @@ const transporter = nodemailer.createTransporter({
   }
 });
 
+// Test the transporter on startup
+transporter.verify(function(error, success) {
+  if (error) {
+    console.log('Error setting up email transporter:', error);
+  } else {
+    console.log('Server is ready to take our messages');
+  }
+});
+
 // Contact form endpoint
 app.post('/api/contact', (req, res) => {
   const { name, email, subject, message } = req.body;
+  
+  // Validation
+  if (!name || !email || !message) {
+    return res.status(400).json({ success: false, message: 'Name, email, and message are required' });
+  }
   
   // Email options for admin notification
   const adminMailOptions = {
@@ -92,6 +104,11 @@ app.post('/api/contact', (req, res) => {
 // Registration form endpoint
 app.post('/api/register', (req, res) => {
   const { firstName, lastName, email, phone, program, startDate, experience, education, goals } = req.body;
+  
+  // Validation
+  if (!firstName || !lastName || !email || !program) {
+    return res.status(400).json({ success: false, message: 'First name, last name, email, and program selection are required' });
+  }
   
   // Email options for admin notification
   const adminMailOptions = {
@@ -174,7 +191,13 @@ app.get('/test', (req, res) => {
   res.send('Email server is running!');
 });
 
+// Health check endpoint for Render
+app.get('/', (req, res) => {
+  res.send('Shalomville Email Server is running!');
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
