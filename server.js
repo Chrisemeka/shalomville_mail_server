@@ -1,5 +1,5 @@
 const express = require('express');
-const nodemailer = require('nodemailer');
+const { createTransport } = require('nodemailer');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 require('dotenv').config();
@@ -13,7 +13,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Email transporter setup
-const transporter = nodemailer.createTransporter({
+const transporter = createTransport({
   service: 'gmail',
   auth: {
     user: process.env.EMAIL, // Your Gmail address
@@ -30,6 +30,7 @@ transporter.verify(function(error, success) {
   }
 });
 
+// Rest of the code remains the same...
 // Contact form endpoint
 app.post('/api/contact', (req, res) => {
   const { name, email, subject, message } = req.body;
